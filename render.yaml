@@ -1,0 +1,44 @@
+services:
+  # Backend service
+  - type: web
+    name: planning-poker-backend
+    env: node
+    plan: starter
+    buildCommand: echo "Using Docker build"
+    dockerfilePath: ./apps/backend/Dockerfile.render
+    dockerContext: .
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        fromService:
+          type: web
+          name: planning-poker-backend
+          property: port
+    healthCheckPath: /health
+
+  # Frontend service  
+  - type: web
+    name: planning-poker-frontend
+    env: node
+    plan: starter
+    buildCommand: echo "Using Docker build"
+    dockerfilePath: ./apps/frontend/Dockerfile.render
+    dockerContext: .
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        fromService:
+          type: web
+          name: planning-poker-frontend
+          property: port
+      - key: NEXT_PUBLIC_BACKEND_URL
+        fromService:
+          type: web
+          name: planning-poker-backend
+          property: host
+    routes:
+      - type: redirect
+        source: /*
+        destination: https://planning-poker-frontend.onrender.com/$1

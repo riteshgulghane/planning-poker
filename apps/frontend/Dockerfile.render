@@ -1,0 +1,59 @@
+# Render-optimized Dockerfile for Planning Poker Frontend
+FROM node:18-alpine AS base
+
+# Set working directory
+WORKDIR /app
+
+# Copy root package files first (for monorepo setup)
+COPY package*.json ./
+COPY turbo.json ./
+
+# Copy shared package
+COPY shared ./shared
+
+# Copy frontend package files
+COPY apps/frontend/package*.json ./apps/frontend/
+
+# Install dependencies for the entire monorepo
+RUN npm ci --workspace=frontend --workspace=shared
+
+# Build the shared package first
+WORKDIR /app/shared
+RUN npm run build
+
+# Copy frontend source code
+WORKDIR /app/apps/frontend
+COPY apps/frontend/ .
+
+# Build the frontend application
+# Render will provide RENDER_EXTERNAL_URL which we can use for the backend URL
+ARG RENDER_EXTERNAL_URL
+ENV NEXT_PUBLIC_BACKEND_URL=${RENDER_EXTERNAL_URL}
+
+RUN npm run build
+
+# Production stage
+FROM node:18-alpine AS production
+WORKDIR /app
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+
+# Copy built application
+COPY --from=base --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./
+COPY --from=base --chown=nextjs:nodejs /app/apps/frontend/.next/static ./.next/static
+COPY --from=base --chown=nextjs:nodejs /app/apps/frontend/public ./public
+
+# Switch to non-root user
+USER nextjs
+
+# Expose port (Render will set PORT environment variable)
+EXPOSE $PORT
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:$PORT/api/health || exit 1
+
+# Start the application
+CMD ["node", "server.js"]
