@@ -1,0 +1,32 @@
+{
+  "name": "planning-poker",
+  "version": "1.0.0",
+  "description": "Planning Poker application with Next.js frontend and Nest.js backend",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:frontend": "turbo run dev --filter=frontend",
+    "dev:backend": "turbo run dev --filter=backend",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "lint": "turbo run lint"
+  },
+  "keywords": [
+    "planning-poker",
+    "agile",
+    "estimation",
+    "monorepo"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "turbo": "^1.10.16",
+    "typescript": "^5.2.2",
+    "@types/node": "^20.10.0"
+  }
+}
