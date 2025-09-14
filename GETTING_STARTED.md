@@ -31,23 +31,29 @@ npm run build
 cd ..
 ```
 
-### 3. Start the Development Servers
+### Quick Start
 
-You can start both frontend and backend concurrently:
+### Prerequisites
+- Node.js (v18 or later)
+- npm
 
-```bash
-# Start both frontend and backend
-npm run dev
+### Installation
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Build frontend static files: `npm run build --workspace=frontend`
+4. Start unified server: `npm run dev --workspace=backend` (runs on port 3000)
 
-# Or start them individually
-npm run dev:backend  # Starts backend on port 3001
-npm run dev:frontend # Starts frontend on port 3000
-```
+### Development URLs
+- Application: http://localhost:3000
+- API Health: http://localhost:3000/api/health
+- WebSocket: ws://localhost:3000
 
-### 4. Access the Application
+## Architecture (Unified SSR)
 
-- Frontend: http://localhost:3000
-- Backend WebSocket server: http://localhost:3001
+The application now uses a single server architecture:
+- **Backend**: Express.js server that serves both static frontend files and WebSocket API
+- **Frontend**: Next.js built as static files, served by the Express backend
+- **Real-time**: Socket.IO WebSocket integration for live planning poker sessions
 
 ## Running Tests
 

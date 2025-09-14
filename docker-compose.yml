@@ -1,36 +1,20 @@
 version: '3.8'
 
 services:
-  # Backend service
-  backend:
+  # Unified Planning Poker server (backend serves frontend + WebSocket)
+  planning-poker-unified:
     build:
-      context: ./apps/backend
-      dockerfile: Dockerfile
-    environment:
-      - NODE_ENV=production
-      - PORT=3001
-    ports:
-      - "3001:3001"
-    restart: always
-    networks:
-      - planning-poker-network
-
-  # Frontend service
-  frontend:
-    build:
-      context: ./apps/frontend
-      dockerfile: Dockerfile
-      args:
-        - BACKEND_URL=http://localhost:3001
+      context: .
+      dockerfile: apps/backend/Dockerfile
     ports:
       - "3000:3000"
-    restart: always
-    depends_on:
-      - backend
-    networks:
-      - planning-poker-network
-
-# Define a network for services to communicate
-networks:
-  planning-poker-network:
-    driver: bridge
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
